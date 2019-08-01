@@ -26,6 +26,7 @@ local function updateHcalCanvas()
     local weeknames = {"Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"}
     local firstdayofnextmonth = os.time{year=currentyear, month=currentmonth+1, day=1}
     local lastdayofcurrentmonth = os.date("*t", firstdayofnextmonth-24*60*60).day
+    local midlinecolor = {red=1, blue=1, green=1, alpha=0.5}
     for i=1,31 do
         local weekdayofqueriedday = os.date("*t", os.time{year=currentyear, month=currentmonth, day=i}).wday
         local mappedweekdaystr = weeknames[weekdayofqueriedday]
@@ -54,6 +55,8 @@ local function updateHcalCanvas()
             -- 10+24i is next day
             obj.canvas[97].frame.x = tostring(obj.canvas[33+i].frame.w + obj.canvas[33+i].frame.x)
             obj.canvas[97].frame.w = tostring((24-currentHour)/(obj.hcalw-20))
+        else
+            obj.canvas[33+i].fillColor = midlinecolor
         end
         -- hide extra day
         if i > lastdayofcurrentmonth then
