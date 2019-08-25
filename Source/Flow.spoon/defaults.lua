@@ -14,7 +14,8 @@ local defaults = {
         hotkeys = {
             {nil, 'escape', false, 'previous'},
             {nil, 'c', true, function() hs.application.launchOrFocus('Chrome') end, 'Google Chrome' }
-        }
+        },
+        activate = {{'cmd','shift','ctrl'}, 'a'}
     }
 }
 

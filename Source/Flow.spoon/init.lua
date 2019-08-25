@@ -39,9 +39,11 @@ function Flow:start()
             elseif handler == 'previous' then
                 handler = function()
                     local prev_mode = spoon.Flow.history:pop()
-                    local trayColor = spoon.Flow.config[prev_mode]['trayColor']
                     spoon.ModalMgr:deactivate({mode})
-                    spoon.ModalMgr:activate({prev_mode}, trayColor)
+                    if prev_mode then
+                        local trayColor = spoon.Flow.config[prev_mode]['trayColor']
+                        spoon.ModalMgr:activate({prev_mode}, trayColor)
+                    end
                 end
             elseif type(handler) == 'string' and config_modes[handler] then
                 local next_mode = handler
