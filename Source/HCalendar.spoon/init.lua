@@ -55,6 +55,9 @@ local function updateHcalCanvas()
             -- 10+24i is next day
             obj.canvas[97].frame.x = tostring(obj.canvas[33+i].frame.w + obj.canvas[33+i].frame.x)
             obj.canvas[97].frame.w = tostring((24-currentHour)/(obj.hcalw-20))
+            if mappedweekdaystr == "Sa" or mappedweekdaystr == "Su" then
+                obj.canvas[97].fillColor = {hex="#FF7878"}
+            end
         else
             obj.canvas[33+i].fillColor = midlinecolor
         end
