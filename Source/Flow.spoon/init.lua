@@ -6,13 +6,16 @@ Flow.version = "0.1.0"
 Flow.author = "Jokajak"
 Flow.homepage = "https://github.com/jokajak/mySpoons/Source/Flow.spoon/"
 
+--- Flow.logger
+--- Variable
+--- Logger object used within the Spoon. Can be accessed to set the default log level for the messages coming from the Spoon.
+Flow.logger = hs.logger.new('Flow')
+
 -- Internal function used to find our location, so we know where to load files from
 local function script_path()
     local str = debug.getinfo(2, "S").source:sub(2)
     return str:match("(.*/)")
 end
-
-local _log = hs.logger.new('Flow', 'debug')
 
 Flow.spoonPath = script_path()
 dofile(Flow.spoonPath.."/simple_stack.lua")
@@ -28,7 +31,7 @@ function Flow:start()
         spoon.ModalMgr:new(mode)
         local cmodal = spoon.ModalMgr.modal_list[mode]
         for _, hotkeys in pairs(config.hotkeys) do
-            _log.d(hs.inspect.inspect(hotkeys))
+            self.logger.d(hs.inspect.inspect(hotkeys))
             local modifiers = hotkeys[1] or ''
             local keycode = hotkeys[2]
             local exitModal = hotkeys[3]
@@ -48,8 +51,8 @@ function Flow:start()
             elseif type(handler) == 'string' and config_modes[handler] then
                 local next_mode = handler
                 local trayColor = config_modes[next_mode]['trayColor']
-                _log.d('Creating transition from '..mode..' to '.. next_mode)
-                _log.d('Traycolor: '..hs.inspect.inspect(trayColor))
+                self.logger.d('Creating transition from '..mode..' to '.. next_mode)
+                self.logger.d('Traycolor: '..hs.inspect.inspect(trayColor))
                 handler = function()
                     local nmodal = spoon.ModalMgr.modal_list[next_mode]
                     if nmodal then
@@ -61,19 +64,24 @@ function Flow:start()
                     end
                 end
             end
-            if exitModal then
+            if exitModal and type(handler) == "function" then
                 local old_handler = handler
                 handler = function()
                     spoon.ModalMgr:deactivate({mode})
                     old_handler()
                 end
             end
-            -- _log.d(hs.inspect.inspect(hotkeys))
-            -- _log.d('Modifiers: '..hs.inspect.inspect(modifiers))
-            -- _log.d('Keycode: '..hs.inspect.inspect(keycode))
-            -- _log.d(description)
-            -- _log.d(handler)
-            cmodal:bind(modifiers, keycode, description, handler)
+            -- self.logger.d(hs.inspect.inspect(hotkeys))
+            -- self.logger.d('Modifiers: '..hs.inspect.inspect(modifiers))
+            -- self.logger.d('Keycode: '..hs.inspect.inspect(keycode))
+            -- self.logger.d(description)
+            -- self.logger.d(handler)
+            if type(handler) == "function" then
+                cmodal:bind(modifiers, keycode, description, handler)
+            else
+                self.logger.d(hs.inspect.inspect(config_modes))
+                self.logger.e('Bad configuration entry: '..hs.inspect.inspect(hotkeys))
+            end
         end
         if config['activate'] then
             local activate_modifiers = config['activate'][1] or ''
@@ -83,11 +91,6 @@ function Flow:start()
                 spoon.ModalMgr:activate({mode}, config.trayColor)
             end)
         end
-    end
-end
-
-function Flow:bindHotkeys(hotkeys)
-    for action, hotkey in pairs(hotkeys) do
     end
 end
 
