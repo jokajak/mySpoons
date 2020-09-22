@@ -37,35 +37,45 @@ local function updateHcalCanvas()
             obj.canvas[33+i].fillColor = {hex="#FF7878"}
             obj.canvas[64+i].textColor = {hex="#FF7878"}
         end
-        if i < math.tointeger(currentday) then
-            obj.canvas[33+i].fillColor = {hex="#00BAFF", alpha=0.8}
-            obj.canvas[96].frame.x = tostring((10+24*(i-1))/obj.hcalw)
-        elseif i == math.tointeger(currentday) then
-            local currentHour = os.date('%H')
-            local currentMinute = os.date('%M')
-            local totalMinutes = 1440
-            local percentCurrentDay = (60*currentHour)/totalMinutes
-            obj.canvas[33+i].fillColor = {hex="#00BAFF", alpha=0.8}
-            -- midline rectangle is 24 long and 0 < currentHour < 24
-            -- therefore the width is the current hour
-            obj.canvas[33+i].frame.w = tostring(currentHour/(obj.hcalw-20))
-            obj.canvas[96].frame.x = tostring((10+24*(i-1))/obj.hcalw)
-            --(10 + 24i - 24)/obj.hcalw
-            -- (24i - 14)/obj.hcalw
-            -- 10+24i is next day
-            obj.canvas[97].frame.x = tostring(obj.canvas[33+i].frame.w + obj.canvas[33+i].frame.x)
-            obj.canvas[97].frame.w = tostring((24-currentHour)/(obj.hcalw-20))
-            if mappedweekdaystr == "Sa" or mappedweekdaystr == "Su" then
-                obj.canvas[97].fillColor = {hex="#FF7878"}
-            end
+        if obj.progress then
+            if i < math.tointeger(currentday) then
+                obj.canvas[33+i].fillColor = {hex="#00BAFF", alpha=0.8}
+                obj.canvas[96].frame.x = tostring((10+24*(i-1))/obj.hcalw)
+            elseif i == math.tointeger(currentday) then
+                local currentHour = os.date('%H')
+                local currentMinute = os.date('%M')
+                local totalMinutes = 1440
+                local percentCurrentDay = (60*currentHour)/totalMinutes
+                obj.canvas[33+i].fillColor = {hex="#00BAFF", alpha=0.8}
+                -- midline rectangle is 24 long and 0 < currentHour < 24
+                -- therefore the width is the current hour
+                obj.canvas[33+i].frame.w = tostring(currentHour/(obj.hcalw-20))
+                obj.canvas[96].frame.x = tostring((10+24*(i-1))/obj.hcalw)
+                --(10 + 24i - 24)/obj.hcalw
+                -- (24i - 14)/obj.hcalw
+                -- 10+24i is next day
+                obj.canvas[97].frame.x = tostring(obj.canvas[33+i].frame.w + obj.canvas[33+i].frame.x)
+                obj.canvas[97].frame.w = tostring((24-currentHour)/(obj.hcalw-20))
+                if mappedweekdaystr == "Sa" or mappedweekdaystr == "Su" then
+                    obj.canvas[97].fillColor = {hex="#FF7878"}
+                end
         else
-            obj.canvas[33+i].fillColor = midlinecolor
+            if i == math.tointeger(currentday) then
+                obj.canvas[33+i].fillColor = {hex="#00BAFF", alpha=0.8}
+                obj.canvas[96].frame.x = tostring((10+24*(i-1))/obj.hcalw)
+            end
         end
         -- hide extra day
         if i > lastdayofcurrentmonth then
             obj.canvas[2+i].textColor.alpha = 0
-            obj.canvas[33+i].fillColor.alpah = 0
-            obj.canvas[64+i].textColor.alpah = 0
+            obj.canvas[33+i].fillColor.alpha = 0
+            obj.canvas[64+i].textColor.alpha = 0
+        end
+        -- hide progress fill bar
+        if not obj.showProgress then
+            obj.canvas[97].fillColor.alpha = 0
+        else
+            obj.canvas[97].fillColor.alpha = 0.5
         end
     end
     -- trim the canvas
@@ -191,13 +201,27 @@ function obj:init()
         }
     }
 
+end
+
+function obj:start()
     if obj.timer == nil then
         obj.timer = hs.timer.doEvery(1800, function() updateHcalCanvas() end)
         obj.timer:setNextTrigger(0)
     else
         obj.timer:start()
     end
+    if obj.canvas then
+        obj.canvas:show()
+    end
+end
 
+function obj:stop()
+    if obj.timer then
+        obj.timer:stop()
+    end
+    if obj.canvas then
+        obj.canvas:hide()
+    end
 end
 
 return obj

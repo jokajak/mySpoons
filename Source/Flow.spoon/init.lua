@@ -95,9 +95,15 @@ function Flow:start()
 end
 
 function Flow:init()
+    if (not self.menubar) then
+        self.menubar = hs.menubar.new(false)
+    end
 end
 
 function Flow:stop()
+    if (self.menubar) then
+        self.menubar:removeFromMenuBar()
+    end
 end
 
 return Flow
